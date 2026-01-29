@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oligarchy AgentVM UI - Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #f2f2f2;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #ff4500;
+            font-size: 24px;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .window {
+            background: #141414;
+            border: 2px solid #404040;
+            width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .titlebar {
+            background: #1f1f1f;
+            border-bottom: 2px solid #404040;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .titlebar-title {
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #f2f2f2;
+        }
+        
+        .titlebar-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .titlebar-button {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #666;
+            background: #333;
+        }
+        
+        .content {
+            padding: 24px;
+        }
+        
+        .status-widget {
+            background: #1f1f1f;
+            border: 2px solid #404040;
+            padding: 24px;
+            margin-bottom: 24px;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .status-indicator {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        
+        .status-indicator-outer {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(115, 115, 115, 0.3);
+            position: absolute;
+        }
+        
+        .status-indicator-inner {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #737373;
+            position: absolute;
+            top: 6px;
+            left: 6px;
+        }
+        
+        .status-indicator.running .status-indicator-outer {
+            background: rgba(255, 204, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.running .status-indicator-inner {
+            background: #ffcc00;
+        }
+        
+        .status-indicator.success .status-indicator-outer {
+            background: rgba(0, 224, 102, 0.3);
+        }
+        
+        .status-indicator.success .status-indicator-inner {
+            background: #00e066;
+        }
+        
+        .status-indicator.failed .status-indicator-outer {
+            background: rgba(255, 51, 51, 0.3);
+        }
+        
+        .status-indicator.failed .status-indicator-inner {
+            background: #ff3333;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .status-text {
+            flex: 1;
+        }
+        
+        .status-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #737373;
+            margin-bottom: 8px;
+        }
+        
+        .status-title.running {
+            color: #ffcc00;
+        }
+        
+        .status-title.success {
+            color: #00e066;
+        }
+        
+        .status-title.failed {
+            color: #ff3333;
+        }
+        
+        .status-subtitle {
+            font-size: 12px;
+            color: #b3b3b3;
+            margin-bottom: 4px;
+        }
+        
+        .status-prompt {
+            font-size: 11px;
+            color: #737373;
+        }
+        
+        .status-progress {
+            width: 100%;
+            height: 4px;
+            background: #404040;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+        
+        .status-progress-bar {
+            width: 30%;
+            height: 100%;
+            background: #ff4500;
+            animation: progress 1.5s infinite linear;
+        }
+        
+        @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+        }
+        
+        .command-palette {
+            margin-bottom: 24px;
+        }
+        
+        .command-input {
+            width: 100%;
+            background: #292929;
+            border: 2px solid #404040;
+            color: #f2f2f2;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .command-input:focus {
+            border-color: #ff4500;
+        }
+        
+        .command-input::placeholder {
+            color: #737373;
+        }
+        
+        .agent-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .agent-label {
+            color: #b3b3b3;
+            font-size: 12px;
+        }
+        
+        .agent-dropdown {
+            background: #292929;
+            border: 1px solid #404040;
+            color: #f2f2f2;
+            padding: 8px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            outline: none;
+        }
+        
+        .section-label {
+            color: #737373;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            margin-top: 12px;
+        }
+        
+        .task-list {
+            background: #1f1f1f;
+            border: 2px solid #404040;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .task-item {
+            border-bottom: 1px solid #333;
+            padding: 12px 16px;
+            transition: background 0.2s;
+        }
+        
+        .task-item:hover {
+            background: #292929;
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+        
+        .task-status {
+            font-size: 14px;
+        }
+        
+        .task-agent {
+            color: #ff4500;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .task-time {
+            margin-left: auto;
+            color: #737373;
+            font-size: 10px;
+        }
+        
+        .task-prompt {
+            color: #b3b3b3;
+            font-size: 12px;
+        }
+        
+        .features {
+            margin-top: 60px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        
+        .feature {
+            background: #1f1f1f;
+            border: 2px solid #404040;
+            padding: 24px;
+        }
+        
+        .feature-title {
+            color: #ff4500;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .feature-text {
+            color: #b3b3b3;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+        
+        .color-palette {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #404040;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Oligarchy AgentVM UI - Brutalist Design</h1>
+        
+        <!-- Main Window Mockup -->
+        <div class="window">
+            <!-- Title Bar -->
+            <div class="titlebar">
+                <div class="titlebar-title">OLIGARCHY AGENTVM</div>
+                <div class="titlebar-buttons">
+                    <div class="titlebar-button"></div>
+                    <div class="titlebar-button"></div>
+                    <div class="titlebar-button"></div>
+                </div>
+            </div>
+            
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Status Widget - IDLE State -->
+                <div class="status-widget" id="status-idle" style="display: flex;">
+                    <div class="status-indicator">
+                        <div class="status-indicator-outer"></div>
+                        <div class="status-indicator-inner"></div>
+                    </div>
+                    <div class="status-text">
+                        <div class="status-title">AGENT SYSTEM IDLE</div>
+                        <div class="status-prompt">No active tasks</div>
+                    </div>
+                </div>
+                
+                <!-- Status Widget - RUNNING State (hidden by default) -->
+                <div class="status-widget" id="status-running" style="display: none;">
+                    <div class="status-indicator running">
+                        <div class="status-indicator-outer"></div>
+                        <div class="status-indicator-inner"></div>
+                    </div>
+                    <div class="status-text">
+                        <div class="status-title running">RUNNING</div>
+                        <div class="status-subtitle">Agent: AIDER</div>
+                        <div class="status-prompt">Add comprehensive error handling to API endpoints</div>
+                        <div class="status-progress">
+                            <div class="status-progress-bar"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Command Palette -->
+                <div class="command-palette">
+                    <input type="text" class="command-input" placeholder="ENTER COMMAND OR PROMPT...">
+                    <div class="agent-selector">
+                        <span class="agent-label">AGENT:</span>
+                        <select class="agent-dropdown">
+                            <option>aider</option>
+                            <option>opencode</option>
+                            <option>claude</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Recent Tasks -->
+                <div class="section-label">RECENT TASKS</div>
+                <div class="task-list">
+                    <div class="task-item">
+                        <div class="task-header">
+                            <span class="task-status">🟢</span>
+                            <span class="task-agent">AIDER</span>
+                            <span class="task-time">09:45:32</span>
+                        </div>
+                        <div class="task-prompt">Add error handling to all API endpoints</div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-header">
+                            <span class="task-status">🟢</span>
+                            <span class="task-agent">OPENCODE</span>
+                            <span class="task-time">09:42:15</span>
+                        </div>
+                        <div class="task-prompt">Refactor database connection pool for better performance</div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-header">
+                            <span class="task-status">🔴</span>
+                            <span class="task-agent">CLAUDE</span>
+                            <span class="task-time">09:38:07</span>
+                        </div>
+                        <div class="task-prompt">Implement new JWT authentication system</div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-header">
+                            <span class="task-status">🟢</span>
+                            <span class="task-agent">AIDER</span>
+                            <span class="task-time">09:30:22</span>
+                        </div>
+                        <div class="task-prompt">Update API documentation to reflect latest changes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features Grid -->
+        <div class="features">
+            <div class="feature">
+                <div class="feature-title">BRUTALIST AESTHETIC</div>
+                <div class="feature-text">
+                    Monochrome color scheme with high contrast. Sharp corners, no unnecessary rounded elements. Functional, industrial design that prioritizes clarity and performance over decoration.
+                </div>
+                <div class="color-palette">
+                    <div class="color-swatch" style="background: #141414;" title="Base"></div>
+                    <div class="color-swatch" style="background: #1f1f1f;" title="Raised"></div>
+                    <div class="color-swatch" style="background: #f2f2f2;" title="Primary"></div>
+                    <div class="color-swatch" style="background: #ff4500;" title="Accent"></div>
+                    <div class="color-swatch" style="background: #00e066;" title="Success"></div>
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-title">NATIVE PERFORMANCE</div>
+                <div class="feature-text">
+                    GTK4 with direct Cairo rendering. No Electron bloat—just ~180MB memory footprint vs 1200MB+ for Electron apps. 60fps animations with hardware acceleration. Native Wayland protocol support.
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-title">ASYNC ARCHITECTURE</div>
+                <div class="feature-text">
+                    Non-blocking API calls with aiohttp. Real-time status updates without freezing the UI. GLib event loop integration for smooth GTK updates. Multiple concurrent agent tasks supported.
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-title">MONOSPACE TYPOGRAPHY</div>
+                <div class="feature-text">
+                    Terminal-inspired interface using monospace fonts throughout. Clear information hierarchy with consistent spacing. Letter-spaced uppercase labels for section headers.
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-title">CUSTOM CAIRO WIDGETS</div>
+                <div class="feature-text">
+                    Hand-crafted drawing primitives for status indicators and animations. Direct path rendering with no widget overhead. Optimized for minimal CPU usage even during continuous animations.
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-title">WAYLAND FIRST</div>
+                <div class="feature-text">
+                    Built for modern Linux compositors. Layer shell support for overlay mode (coming soon). Hardware cursor support. Native damage tracking for efficient redraws.
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 60px; padding: 24px; background: #1f1f1f; border: 2px solid #404040;">
+            <div class="feature-title">INTERACTIVE DEMO</div>
+            <div class="feature-text" style="margin-bottom: 16px;">
+                Click the button below to simulate an agent running:
+            </div>
+            <button onclick="simulateTask()" style="background: #ff4500; color: #fff; border: none; padding: 12px 24px; font-family: 'Courier New', monospace; font-size: 12px; cursor: pointer; font-weight: bold; letter-spacing: 1px;">
+                RUN SIMULATION
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function simulateTask() {
+            // Hide idle, show running
+            document.getElementById('status-idle').style.display = 'none';
+            document.getElementById('status-running').style.display = 'flex';
+            
+            // After 3 seconds, return to idle
+            setTimeout(() => {
+                document.getElementById('status-running').style.display = 'none';
+                document.getElementById('status-idle').style.display = 'flex';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+[gd_scene load_steps=3 format=3 uid="uid://dx9q5r8hp3mtr"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_1"]
+size = Vector3(2, 2.5, 2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.5, 0.5, 0.5, 1)
+roughness = 0.5
+metallic = 0.3
+
+[node name="AgentSpawner" type="Node3D"]
+
+[node name="SpawnerBase" type="MeshInstance3D"]
+transform = Transform3D(2, 0, 0, 0, 2.5, 0, 0, 0, 2, 0, 1.25, 0)
+mesh = SubResource("BoxMesh_1")
+material_override = SubResource("StandardMaterial3D_1")
+
+[node name="SpawnPoint" type="Marker3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+
+[node name="InteractionArea" type="Area3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D"]
+shape = SubResource("BoxShape3D_1")
+
+[node name="UI_Panel" type="SubViewportContainer" parent="."]
+transform = Transform3D(0.3, 0, 0, 0, 0.2, 0, 0, 0, 0.3, 0, 4, 0)
+size = Vector2(400, 300)
+
+[node name="SubViewport" type="SubViewport" parent="UI_Panel"]
+size = Vector2i(400, 300)
+transparent_bg = true
+
+[node name="Panel" type="Panel" parent="UI_Panel/SubViewport"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 400.0
+offset_bottom = 300.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI_Panel/SubViewport/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="Title" type="Label" parent="UI_Panel/SubViewport/Panel/VBoxContainer"]
+layout_mode = 2
+text = "AGENT SPAWNER"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="UI_Panel/SubViewport/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="AgentTypeLabel" type="Label" parent="UI_Panel/SubViewport/Panel/VBoxContainer"]
+layout_mode = 2
+text = "Agent Type:"
+
+[node name="AgentTypeSelector" type="OptionButton" parent="UI_Panel/SubViewport/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="PersonalityLabel" type="Label" parent="UI_Panel/SubViewport/Panel/VBoxContainer"]
+layout_mode = 2
+text = "Personality Traits:"
+
+[node name="PersonalityContainer" type="GridContainer" parent="UI_Panel/SubViewport/Panel/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="FriendlinessLabel" type="Label" parent="UI_Panel/SubViewport/Panel/VBoxContainer/PersonalityContainer"]
+layout_mode = 2
+text = "Friendliness:"
+
+[node name="FriendlinessSlider" type="HSlider" parent="UI_Panel/SubViewport/Panel/VBoxContainer/PersonalityContainer"]
+layout_mode = 2
+min_value = 0.0
+max_value = 1.0
+value = 0.8
+
+[node name="EfficiencyLabel" type="Label" parent="UI_Panel/SubViewport/Panel/VBoxContainer/PersonalityContainer"]
+layout_mode = 2
+text = "Efficiency:"
+
+[node name="EfficiencySlider" type="HSlider" parent="UI_Panel/SubViewport/Panel/VBoxContainer/PersonalityContainer"]
+layout_mode = 2
+min_value = 0.0
+max_value = 1.0
+value = 0.9
+
+[node name="CreativityLabel" type="Label" parent="UI_Panel/SubViewport/Panel/VBoxContainer/PersonalityContainer"]
+layout_mode = 2
+text = "Creativity:"
+
+[node name="CreativitySlider" type="HSlider" parent="UI_Panel/SubViewport/Panel/VBoxContainer/PersonalityContainer"]
+layout_mode = 2
+min_value = 0.0
+max_value = 1.0
+value = 0.7
+
+[node name="TaskLabel" type="Label" parent="UI_Panel/SubViewport/Panel/VBoxContainer"]
+layout_mode = 2
+text = "Initial Task:"
+
+[node name="TaskInput" type="LineEdit" parent="UI_Panel/SubViewport/Panel/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "e.g., Create a new feature"
+
+[node name="HSeparator2" type="HSeparator" parent="UI_Panel/SubViewport/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ButtonContainer" type="HBoxContainer" parent="UI_Panel/SubViewport/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="SpawnButton" type="Button" parent="UI_Panel/SubViewport/Panel/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Spawn Agent"
+
+[node name="CancelButton" type="Button" parent="UI_Panel/SubViewport/Panel/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(3, 4, 3)
+
+[editable path="UI_Panel/SubViewport/Panel/VBoxContainer/PersonalityContainer/FriendlinessSlider"]
+[editable path="UI_Panel/SubViewport/Panel/VBoxContainer/PersonalityContainer/EfficiencySlider"]
+[editable path="UI_Panel/SubViewport/Panel/VBoxContainer/PersonalityContainer/CreativitySlider"]

@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # Agent System API
+  # ========================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://agent:password@postgres:5432/agentsystem
+      - REDIS_URL=redis://redis:6379/0
+      - AGENTVM_API_KEY=${AGENTVM_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./configs:/app/configs
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ========================================
+  # PostgreSQL Database
+  # ========================================
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=agentsystem
+      - POSTGRES_USER=agent
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deployment/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # ========================================
+  # Redis Cache
+  # ========================================
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # ========================================
+  # Nginx Reverse Proxy
+  # ========================================
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

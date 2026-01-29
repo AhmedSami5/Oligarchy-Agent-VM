@@ -1,0 +1,135 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # Agent System API - Cloud Optimized
+  # ========================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: cloud
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://agent:${POSTGRES_PASSWORD}@postgres:5432/agentsystem
+      - REDIS_URL=redis://redis:6379/0
+      - AGENTVM_API_KEY=${AGENTVM_API_KEY}
+      - CLOUD_ENVIRONMENT=production
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-west-2}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./configs/cloud.yaml:/app/configs/production.yaml
+      - ./logs:/app/logs
+    restart: unless-stopped
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '1.0'
+          memory: 512M
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 30s
+        max_failure_ratio: 0.3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ========================================
+  # PostgreSQL with Cloud Configuration
+  # ========================================
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=agentsystem
+      - POSTGRES_USER=agent
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deployment/cloud-init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # ========================================
+  # Redis with Cloud Configuration
+  # ========================================
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # ========================================
+  # Load Balancer
+  # ========================================
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/nginx-cloud.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+
+  # ========================================
+  # Monitoring (Prometheus + Grafana)
+  # ========================================
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:

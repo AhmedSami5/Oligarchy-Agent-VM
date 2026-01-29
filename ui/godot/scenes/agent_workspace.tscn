@@ -1,0 +1,87 @@
+[gd_scene load_steps=3 format=3 uid="uid://cw8r2p5fn1xtr"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_1"]
+size = Vector3(4, 0.1, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2"]
+size = Vector3(1.5, 1.2, 0.8)
+
+[node name="AgentWorkspace" type="Node3D"]
+
+[node name="Floor" type="MeshInstance3D"]
+transform = Transform3D(4, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0)
+mesh = SubResource("BoxMesh_1")
+
+[node name="Desk" type="MeshInstance3D"]
+transform = Transform3D(1.5, 0, 0, 0, 1.2, 0, 0, 0, 0.8, 0, 0.6, 0)
+mesh = SubResource("BoxMesh_2")
+
+[node name="Computer" type="MeshInstance3D"]
+transform = Transform3D(0.8, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 0, 1.2, 0)
+
+[node name="Monitor" type="CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 0.8, 0, 0, 0, 0.1, 0, 1.8, -0.6)
+size = Vector3(1.2, 0.8, 0.1)
+material = SubResource("StandardMaterial3D_1")
+
+[node name="Keyboard" type="CSGBox3D"]
+transform = Transform3D(0.8, 0, 0, 0, 0.05, 0, 0, 0, 0.4, 0, 0.65, 0)
+size = Vector3(0.8, 0.05, 0.4)
+
+[node name="Chair" type="CSGBox3D"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.6, 1.2)
+size = Vector3(0.5, 0.5, 0.5)
+
+[node name="CodeDisplay" type="SubViewportContainer" parent="Computer"]
+transform = Transform3D(0.5, 0, 0, 0, 0.375, 0, 0, 0, 0.5, 0, 0.3, -0.31)
+size = Vector2(800, 600)
+pivot_offset = Vector2(400, 300)
+
+[node name="SubViewport" type="SubViewport" parent="Computer/CodeDisplay"]
+size = Vector2i(800, 600)
+render_target_update_mode = 4
+
+[node name="Panel" type="Panel" parent="Computer/CodeDisplay/SubViewport"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 800.0
+offset_bottom = 600.0
+
+[node name="CodeText" type="TextEdit" parent="Computer/CodeDisplay/SubViewport/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+theme_override_font_sizes/font_size = 20
+wrap_mode = 1
+placeholder_text = "// Agent coding interface..."
+
+[node name="AgentPosition" type="Marker3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 1.2)
+
+[node name="Lighting" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D"]
+transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 5, 0)
+light_energy = 0.8
+shadow_enabled = true
+
+[node name="OmniLight3D" type="OmniLight3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+light_energy = 1.5
+light_size = 1.0
+shadow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.2, 0.2, 0.3, 1)
+emission_enabled = true
+emission = Color(0.1, 0.1, 0.2, 1)
+emission_energy_multiplier = 2.0
+roughness = 0.2
+metallic = 0.8
+
+[editable path="Computer/CodeDisplay/SubViewport/CodeText"]

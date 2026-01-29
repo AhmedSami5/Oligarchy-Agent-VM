@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentVM Godot Plugin - Interface Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1e1e1e;
+            color: #e0e0e0;
+            padding: 40px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #888;
+            margin-bottom: 40px;
+        }
+        
+        .godot-window {
+            background: #2b2b2b;
+            border: 1px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Title bar */
+        .titlebar {
+            background: #353535;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+        
+        .titlebar-title {
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+        
+        /* Main layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            height: 600px;
+        }
+        
+        /* Scene view (left) */
+        .scene-view {
+            background: #1e1e1e;
+            border-right: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .scene-toolbar {
+            background: #2b2b2b;
+            padding: 8px;
+            border-bottom: 1px solid #444;
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .scene-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        /* AgentVM panel (right) */
+        .agentvm-panel {
+            background: #252525;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            background: #2b2b2b;
+            padding: 10px 12px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            color: #4a90e2;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .connection-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff00;
+            box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+        }
+        
+        .panel-content {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* Status box */
+        .status-box {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        
+        .status-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .status-value {
+            color: #00ff00;
+            font-size: 12px;
+        }
+        
+        /* Prompt section */
+        .prompt-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .section-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .prompt-input {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 8px;
+            color: #e0e0e0;
+            font-family: monospace;
+            font-size: 12px;
+            resize: none;
+            min-height: 60px;
+        }
+        
+        .agent-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .agent-dropdown {
+            flex: 1;
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 6px 10px;
+            color: #e0e0e0;
+            font-size: 12px;
+        }
+        
+        /* Buttons */
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #4a90e2;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #357abd;
+        }
+        
+        .btn-secondary {
+            background: #333;
+            color: #aaa;
+            border: 1px solid #444;
+        }
+        
+        .btn-secondary:hover {
+            background: #3a3a3a;
+        }
+        
+        /* Quick actions */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .quick-btn {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: #e0e0e0;
+            font-size: 11px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        
+        .quick-btn:hover {
+            background: #2a2a2a;
+            border-color: #4a90e2;
+        }
+        
+        /* Task list */
+        .task-list {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .task-item {
+            padding: 8px 10px;
+            border-bottom: 1px solid #333;
+            font-size: 11px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-item:hover {
+            background: #252525;
+        }
+        
+        .task-status {
+            font-size: 12px;
+        }
+        
+        .task-text {
+            flex: 1;
+            color: #aaa;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Bottom panel */
+        .bottom-panel {
+            background: #1e1e1e;
+            border-top: 1px solid #444;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .bottom-toolbar {
+            background: #2b2b2b;
+            padding: 6px 12px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 12px;
+        }
+        
+        .tab {
+            padding: 4px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            color: #888;
+        }
+        
+        .tab.active {
+            background: #1e1e1e;
+            color: #4a90e2;
+        }
+        
+        .toolbar-spacer {
+            flex: 1;
+        }
+        
+        .toolbar-btn {
+            background: #333;
+            border: 1px solid #444;
+            padding: 4px 10px;
+            border-radius: 3px;
+            color: #aaa;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        
+        .toolbar-btn:hover {
+            background: #3a3a3a;
+        }
+        
+        .output-content {
+            flex: 1;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #aaa;
+            overflow-y: auto;
+        }
+        
+        .output-line {
+            margin-bottom: 4px;
+        }
+        
+        .output-line.success {
+            color: #00ff00;
+        }
+        
+        .output-line.error {
+            color: #ff5555;
+        }
+        
+        .output-line.warning {
+            color: #ffaa00;
+        }
+        
+        /* Features grid */
+        .features {
+            margin-top: 60px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .feature {
+            background: #2b2b2b;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        
+        .feature-title {
+            color: #4a90e2;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .feature-text {
+            color: #aaa;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AgentVM Godot Plugin Interface</h1>
+        <p class="subtitle">Editor integration for AI-assisted game development</p>
+        
+        <!-- Godot Editor Mockup -->
+        <div class="godot-window">
+            <!-- Title bar -->
+            <div class="titlebar">
+                <div class="titlebar-title">Godot Engine - MyGame.tscn</div>
+                <div>●●●</div>
+            </div>
+            
+            <!-- Main layout -->
+            <div class="main-layout">
+                <!-- Scene view (left side) -->
+                <div class="scene-view">
+                    <div class="scene-toolbar">
+                        2D | 3D | Script | AssetLib
+                    </div>
+                    <div class="scene-content">
+                        [ Game Scene / Script Editor ]
+                    </div>
+                </div>
+                
+                <!-- AgentVM Panel (right side) -->
+                <div class="agentvm-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">OLIGARCHY AGENTVM</div>
+                        <div class="connection-indicator"></div>
+                    </div>
+                    
+                    <div class="panel-content">
+                        <!-- Status -->
+                        <div class="status-box">
+                            <div class="status-label">Status</div>
+                            <div class="status-value">Connected</div>
+                        </div>
+                        
+                        <!-- Prompt section -->
+                        <div class="prompt-section">
+                            <div class="section-label">Prompt</div>
+                            <textarea class="prompt-input" placeholder="Enter your coding task or instruction...">Add double-jump ability to player</textarea>
+                            
+                            <div class="agent-selector">
+                                <div class="section-label">Agent:</div>
+                                <select class="agent-dropdown">
+                                    <option>aider</option>
+                                    <option>opencode</option>
+                                    <option>claude</option>
+                                </select>
+                            </div>
+                            
+                            <div class="button-group">
+                                <button class="btn btn-primary">▶ Run Agent</button>
+                                <button class="btn btn-secondary">⏹ Cancel</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick actions -->
+                        <div>
+                            <div class="section-label">Quick Actions</div>
+                            <div class="quick-actions">
+                                <button class="quick-btn">🔧 Fix Errors</button>
+                                <button class="quick-btn">📝 Add Comments</button>
+                                <button class="quick-btn">♻️ Refactor</button>
+                                <button class="quick-btn">🧪 Add Tests</button>
+                                <button class="quick-btn">⚡ Optimize</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Task list -->
+                        <div>
+                            <div class="section-label">Tasks</div>
+                            <div class="task-list">
+                                <div class="task-item">
+                                    <span class="task-status">⚙️</span>
+                                    <span class="task-text">[aider] Adding double-jump ability...</span>
+                                </div>
+                                <div class="task-item">
+                                    <span class="task-status">✅</span>
+                                    <span class="task-text">[opencode] Fixed collision detection</span>
+                                </div>
+                                <div class="task-item">
+                                    <span class="task-status">✅</span>
+                                    <span class="task-text">[aider] Added sound effects</span>
+                                </div>
+                                <div class="task-item">
+                                    <span class="task-status">❌</span>
+                                    <span class="task-text">[claude] Implement AI pathfinding</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom panel -->
+            <div class="bottom-panel">
+                <div class="bottom-toolbar">
+                    <div class="tab">Output</div>
+                    <div class="tab">Debugger</div>
+                    <div class="tab active">AgentVM Output</div>
+                    <div class="toolbar-spacer"></div>
+                    <label><input type="checkbox" checked> Auto-scroll</label>
+                    <button class="toolbar-btn">Clear</button>
+                </div>
+                <div class="output-content">
+                    <div class="output-line">[09:42:15] ⚙️  STARTED: Add double-jump ability to player</div>
+                    <div class="output-line">[09:42:17] Agent: aider</div>
+                    <div class="output-line">[09:42:17] Repository: /home/user/MyGame</div>
+                    <div class="output-line">[09:42:18] Processing...</div>
+                    <div class="output-line success">[09:42:45] ✅ COMPLETED: Task task_1738156965</div>
+                    <div class="output-line">Output:</div>
+                    <div class="output-line">Modified Player.gd:</div>
+                    <div class="output-line">- Added jump_count variable</div>
+                    <div class="output-line">- Added double_jump_enabled flag</div>
+                    <div class="output-line">- Modified _physics_process() to handle double jump</div>
+                    <div class="output-line">────────────────────────────────────────────────────────</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Features -->
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🎮</div>
+                <div class="feature-title">Editor Integration</div>
+                <div class="feature-text">
+                    Seamlessly integrated into Godot's editor UI. Right-side dock panel for quick access and bottom panel for detailed output. No context switching required.
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-title">Quick Actions</div>
+                <div class="feature-text">
+                    One-click access to common AI tasks: fix errors, add comments, refactor code, generate tests, and optimize performance. Perfect for rapid iteration.
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-title">Multiple Agents</div>
+                <div class="feature-text">
+                    Switch between aider, opencode, and claude agents. Each agent has unique strengths for different types of coding tasks.
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Task Management</div>
+                <div class="feature-text">
+                    Track active and historical tasks. Real-time status updates with clear success/failure indicators. Click any task for detailed results.
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🔗</div>
+                <div class="feature-title">GDScript API</div>
+                <div class="feature-text">
+                    Full programmatic access via GDScript. Build custom workflows, create quest systems, or integrate AI into your game mechanics.
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">Project Context</div>
+                <div class="feature-text">
+                    Agents automatically work within your Godot project directory. All file paths are properly resolved and changes are immediately visible.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
