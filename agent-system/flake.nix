@@ -242,6 +242,88 @@
         in devShell dockerImage;
       };
 
+      # Wayland UI application
+      agent-system-ui = let
+        pythonEnv = (nixpkgs.python311.withPackages (ps: [
+          ps.gi
+          ps.aiohttp
+          ps.pycairo
+          ps.gbulb
+        ]));
+        
+        # GTK4 and Wayland dependencies
+        gtk4Deps = with nixpkgs; [
+          gtk4
+          libadwaita
+          cairo
+          pango
+          glib
+          gdk-pixbuf
+          wayland
+          libxkbcommon
+        ];
+        
+        # Development shell for UI
+        devShell = nixpkgs.mkShell {
+          buildInputs = with nixpkgs; [
+            # Python development
+            python311
+            python311Packages.gi
+            python311Packages.aiohttp
+            python311Packages.pycairo
+            python311Packages.gbulb
+            
+            # GTK4 and Wayland
+            gtk4
+            libadwaita
+            cairo
+            pango
+            glib
+            gdk-pixbuf
+            wayland
+            libxkbcommon
+            
+            # Development tools
+            black
+            ruff
+            mypy
+            pytest
+            
+            # Utilities
+            jq
+            curl
+            git
+          ];
+          
+          shellHook = ''
+            echo "Setting up AgentVM Wayland UI development environment..."
+            
+            # Set up Python environment
+            if [ ! -d ".venv" ]; then
+              python3.11 -m venv .venv
+            fi
+            source .venv/bin/activate
+            
+            echo "UI development environment ready!"
+            echo "Run 'python3 agent-system/ui/wayland/agentvm_ui.py' to start the UI"
+          '';
+        };
+        
+        # Desktop entry for the UI
+        desktopEntry = pkgs.makeDesktopItem {
+          name = "AgentVM UI";
+          exec = "agentvm-ui";
+          icon = "applications-development";
+          type = "Application";
+          desktopName = "AgentVM UI";
+          genericName = "AgentVM Wayland UI";
+          comment = "Oligarchy AgentVM Wayland Compositor Interface";
+          categories = [ "Development" "Utility" ];
+        };
+        
+      in pythonEnv gtk4Deps devShell desktopEntry;
+      };
+
       # Terraform configurations
       terraformConfigs = {
         aws = let
@@ -432,6 +514,18 @@
     # ========================================
     
     apps.x86_64-linux = {
+      # Agent System UI application
+      agent-system-ui = {
+        type = "app";
+        program = "${pkgs.writeShell "agentvm-ui" }/bin/agentvm-ui";
+        text = ''
+          #!/usr/bin/env nix-shell
+          
+          # AgentVM Wayland UI launcher
+          exec python3 ${self.packages.x86_64-linux.agent-system-ui}/agent-system/ui/wayland/agentvm_ui.py
+        '';
+      };
+      
       # Development environment
       devShell = devshell.mkShell {
         packages = with nixpkgs; [
