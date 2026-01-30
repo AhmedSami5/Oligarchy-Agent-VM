@@ -1,0 +1,238 @@
+version: '3.8'
+
+services:
+  # DeMoD Agent System (with monitoring enabled)
+  agent-system:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app/src
+      - AGENT_ENV=production
+      - METRICS_ENABLED=true
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - monitoring
+      - database
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  # Prometheus Metrics Server
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./infrastructure/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infrastructure/monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - prometheus-data:/prometheus
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  # Grafana Visualization
+  grafana:
+    image: grafana/grafana:10.2.0
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infrastructure/monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./infrastructure/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  # AlertManager
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    ports:
+      - "9093:9093"
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    volumes:
+      - ./infrastructure/monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager-data:/alertmanager
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  # Node Exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:v1.6.0
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  # PostgreSQL Exporter for database metrics
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.12.0
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql
+      - DATA_SOURCE_URI=postgresql://agent:password@postgres:5432/agentsystem?sslmode=disable
+    networks:
+      - monitoring
+      - database
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # Redis Exporter for cache metrics
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.45.0
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    networks:
+      - monitoring
+      - database
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # cAdvisor for container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    ports:
+      - "8080:8080"
+    command:
+      - '--housekeeping_interval=30s'
+      - '--port=8080'
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - monitoring
+    privileged: true
+    devices:
+      - /dev/kmsg
+    restart: unless-stopped
+
+  # Jaeger Collector for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:1.49
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+      - "14269:14269"
+      - "5775:5775/udp"
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=9411
+      - SPAN_STORAGE_TYPE=elasticsearch
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15.3
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=agentsystem
+      - POSTGRES_USER=agent
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_INITDB_ARGS=--shared-preload-libraries=pg_stat_statements
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - postgres-backups:/backups
+      - ./infrastructure/database/postgresql.conf:/etc/postgresql/postgresql.conf
+    networks:
+      - database
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7.2
+    ports:
+      - "6379:6379"
+    command:
+      - redis-server
+      - --appendonly yes
+      - --save 900 1
+      - --save 300 10
+      - --save 60 1000
+    volumes:
+      - redis-data:/data
+    networks:
+      - database
+    restart: unless-stopped
+
+  # Loki for log aggregation
+  loki:
+    image: grafana/loki:2.8.0
+    ports:
+      - "3100:3100"
+    command:
+      - '--config.file=/etc/loki/local-config.yaml'
+    volumes:
+      - ./infrastructure/monitoring/loki/local-config.yaml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  # Promtail for log shipping
+  promtail:
+    image: grafana/promtail:2.8.0
+    command:
+      - '--config.file=/etc/promtail/config.yml'
+    volumes:
+      - ./infrastructure/monitoring/promtail/config.yml:/etc/promtail/config.yml
+      - ./logs:/var/log/app:ro
+      - /var/log:/var/log/host:ro
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  alertmanager-data:
+    driver: local
+  postgres-data:
+    driver: local
+  postgres-backups:
+    driver: local
+  redis-data:
+    driver: local
+  loki-data:
+    driver: local
+
+networks:
+  monitoring:
+    driver: bridge
+  database:
+    driver: bridge

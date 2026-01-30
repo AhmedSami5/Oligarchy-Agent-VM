@@ -1,0 +1,82 @@
+global:
+  resolve_timeout: 5m
+
+receivers:
+  - name: 'pagerduty'
+    pagerduty_configs:
+      - routing_key: 'PAGERDUTY_INTEGRATION_KEY'
+        description: 'DeMoD Agent System Alerts'
+
+  - name: 'email'
+    email_configs:
+      - smarthost: 'localhost'
+        auth_username: 'alerts@demod-agent.com'
+        auth_password: 'SMTP_PASSWORD'
+        from: 'alerts@demod-agent.com'
+        to: 'ops-team@demod-agent.com'
+
+  - name: 'slack'
+    slack_configs:
+      - api_url: 'SLACK_WEBHOOK_URL'
+        channel: '#alerts'
+        title: 'DeMoD Agent System Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'pagerduty'
+
+  routes:
+  # Critical alerts go straight to PagerDuty
+  - match:
+      severity: critical
+    receiver: pagerduty
+    continue: false
+
+  # Security alerts to email and Slack
+  - match:
+      service: security
+    receiver: 'email,slack'
+    group_wait: 5s
+    repeat_interval: 30m
+
+  # Infrastructure warnings to Slack only
+  - match:
+      service: infrastructure
+      severity: warning
+    receiver: slack
+    group_wait: 30s
+    repeat_interval: 2h
+
+  # All other alerts to Slack
+  - receiver: slack
+
+inhibit_rules:
+  # Don't send alerts if system is already down
+  - source_match:
+      alertname: 'HighErrorRate'
+    target_match:
+      alertname: 'SystemDown'
+    equal: ['service', 'instance']
+
+  # Don't send CPU alerts if system is down
+  - source_match:
+      alertname: 'HighCPUUsage'
+    target_match:
+      alertname: 'SystemDown'
+    equal: ['service', 'instance']
+
+# Silence rules for planned maintenance
+silences:
+  - match:
+      service: database
+    start_time: '2024-01-01T02:00:00Z'
+    end_time: '2024-01-01T04:00:00Z'
+    creator: 'maintenance-team'
+    comment: 'Scheduled database maintenance'
+
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'

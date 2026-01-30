@@ -1,0 +1,172 @@
+groups:
+  - name: SystemHealth
+    rules:
+      - alert: SystemDown
+        expr: up{job="demod-agent-system"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: agent-system
+        annotations:
+          summary: "DeMoD Agent System is down"
+          description: "Agent system API has been down for more than 1 minute"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: agent-system
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} errors per second"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+        for: 3m
+        labels:
+          severity: warning
+          service: agent-system
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }} seconds"
+
+  - name: InfrastructureHealth
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is above 80% for more than 5 minutes"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 85% for more than 5 minutes"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+        for: 2m
+        labels:
+          severity: critical
+          service: infrastructure
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is below 10%"
+
+  - name: DatabaseHealth
+    rules:
+      - alert: PostgreSQLDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL database has been down for more than 1 minute"
+
+      - alert: DatabaseConnectionsHigh
+        expr: pg_stat_database_numbackends / pg_settings_max_connections > 0.8
+        for: 2m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High database connection usage"
+          description: "Database connection usage is above 80%"
+
+      - alert: DatabaseReplicationLag
+        expr: pg_replication_lag_seconds > 300
+        for: 1m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Database replication lag"
+          description: "Database replication lag is {{ $value }} seconds"
+
+  - name: CacheHealth
+    rules:
+      - alert: RedisDown
+        expr: up{job="redis-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cache
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis cache has been down for more than 1 minute"
+
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 3m
+        labels:
+          severity: warning
+          service: cache
+        annotations:
+          summary: "High Redis memory usage"
+          description: "Redis memory usage is above 90%"
+
+  - name: AgentSystemBusiness
+    rules:
+      - alert: AgentCreationFailureRate
+        expr: rate(agent_creation_failed_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          service: agent-system
+        annotations:
+          summary: "High agent creation failure rate"
+          description: "Agent creation failure rate is {{ $value }} per second"
+
+      - alert: ActiveAgentsLow
+        expr: agent_active_count < 2
+        for: 10m
+        labels:
+          severity: info
+          service: agent-system
+        annotations:
+          summary: "Low number of active agents"
+          description: "Only {{ $value }} agents are currently active"
+
+      - alert: AgentTaskBacklog
+        expr: agent_task_queue_size > 50
+        for: 5m
+        labels:
+          severity: warning
+          service: agent-system
+        annotations:
+          summary: "Agent task backlog growing"
+          description: "Agent task queue has {{ $value }} pending tasks"
+
+  - name: Security
+    rules:
+      - alert: UnauthorizedRequestRate
+        expr: rate(http_requests_total{status="401"}[5m]) > 0.01
+        for: 1m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "High unauthorized request rate"
+          description: "Unauthorized request rate is {{ $value }} per second"
+
+      - alert: SuspiciousActivity
+        expr: rate(http_requests_total{status=~"4.."}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "Client error rate is {{ $value }} per second"
